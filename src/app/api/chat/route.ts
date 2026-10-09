@@ -259,13 +259,14 @@ export async function POST(req: NextRequest) {
 
     // 7. Obtain stream from Groq or Demo fallback
     let stream: ReadableStream<Uint8Array>;
-    const hasGroqKey = !!process.env.GROQ_API_KEY;
+    const clientKey = req.headers.get('x-groq-key');
+    const effectiveKey = clientKey || process.env.GROQ_API_KEY;
 
-    if (!hasGroqKey) {
+    if (!effectiveKey) {
       stream = createDemoStream(validatedMessage, subject as SubjectType);
     } else {
       try {
-        stream = await streamGroqCompletion(contextMessages);
+        stream = await streamGroqCompletion(contextMessages, undefined, effectiveKey);
       } catch (llmErr: unknown) {
         const err = llmErr as LLMError;
         return NextResponse.json(

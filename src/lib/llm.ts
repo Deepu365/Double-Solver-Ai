@@ -144,9 +144,10 @@ export function prepareContextMessages(
  */
 export async function streamGroqCompletion(
   messages: ChatCompletionMessage[],
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  apiKeyOverride?: string
 ): Promise<ReadableStream<Uint8Array>> {
-  const apiKey = process.env.GROQ_API_KEY;
+  const apiKey = apiKeyOverride || process.env.GROQ_API_KEY;
 
   if (!apiKey) {
     throw new LLMError(
