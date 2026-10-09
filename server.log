@@ -1,0 +1,9 @@
+▲ Next.js 16.4.0
+- Local:         http://localhost:3000
+- Network:       http://10.49.66.126:3000
+✓ Ready in 370ms
+⚠ Warning: Next.js ignored pnpm-lock.yaml in C:\Users\pamot because it is outside the current Git repository (C:\Users\pamot\.gemini\antigravity\scratch\doubtsolver-ai).
+ To use this directory, set `outputFileTracingRoot` in your Next.js config.
+
+✓ Running next.config.ts took 75ms
+^C^C

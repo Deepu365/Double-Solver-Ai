@@ -529,40 +529,34 @@ export default function UnifiedAppPage() {
               </button>
             )}
 
-            {/* API Key Settings Button */}
+            {/* Prominent Glowing API Key Settings Button */}
             <button
               onClick={() => setShowKeyModal(true)}
-              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
-              title="Groq API Key Settings"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600/30 to-teal-600/30 hover:from-emerald-600/50 hover:to-teal-600/50 border border-emerald-500/60 text-emerald-300 hover:text-white text-xs font-semibold transition-all shadow-md cursor-pointer shrink-0"
+              title="Click here to enter Groq API Key"
             >
-              <KeyRound className="w-4 h-4" />
+              <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
+              <span>🔑 Groq API Key</span>
             </button>
           </div>
         </header>
 
-        {/* Optional Sleek Dismissible API Key Banner */}
-        {!hasGroqKey && !isDismissedBanner && (
-          <div className="bg-emerald-950/40 border-b border-emerald-800/40 px-4 py-2 text-xs text-emerald-300 flex items-center justify-between animate-in fade-in">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>
-                <strong>Tip:</strong> Add your free Groq API Key to enable real Llama 3.3 70B for every question!
-              </span>
-              <button
-                onClick={() => setShowKeyModal(true)}
-                className="underline font-semibold text-emerald-200 hover:text-white ml-2"
-              >
-                Set Key
-              </button>
-            </div>
-            <button
-              onClick={() => setIsDismissedBanner(true)}
-              className="text-zinc-400 hover:text-white p-1"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+        {/* Highly Visible API Key Banner */}
+        <div className="bg-gradient-to-r from-emerald-950/90 via-zinc-900/95 to-teal-950/90 border-b border-emerald-500/40 px-4 py-2.5 text-xs text-emerald-200 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
+            <span>
+              <strong>🔑 Groq API Key:</strong> {hasGroqKey ? 'Live Llama 3.3 70B is Active!' : 'మీ Groq API Key ని ఇక్కడ ఎంటర్ చేయండి — Llama 3.3 70B యాక్టివేట్ అవుతుంది!'}
+            </span>
           </div>
-        )}
+          <button
+            onClick={() => setShowKeyModal(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-lg text-xs transition-all shadow-md active:scale-95 cursor-pointer"
+          >
+            <KeyRound className="w-3.5 h-3.5 text-zinc-950 stroke-[2.5]" />
+            <span>{hasGroqKey ? 'Change API Key' : '👉 Click Here to Enter Key'}</span>
+          </button>
+        </div>
 
         {/* ========================================================
             TAB 1: AI TUTOR CHAT INTERFACE
@@ -580,12 +574,31 @@ export default function UnifiedAppPage() {
                   <h2 className="text-2xl font-bold text-white mb-2">
                     What engineering doubt can I resolve today?
                   </h2>
-                  <p className="text-sm text-zinc-400 max-w-lg mb-8 leading-relaxed">
+                  <p className="text-sm text-zinc-400 max-w-lg mb-4 leading-relaxed">
                     Select your subject mode above and ask any doubt. Get answers structured in
                     <span className="text-emerald-300 font-medium"> Simple Explanations</span>,
                     <span className="text-emerald-300 font-medium"> Step-by-Step Logic</span>, and
                     <span className="text-emerald-300 font-medium"> Runnable Code</span>.
                   </p>
+
+                  {/* Prominent API Key setup card */}
+                  <div className="mb-6 p-3 rounded-xl bg-zinc-900/90 border border-emerald-500/40 flex items-center justify-between max-w-md w-full shadow-lg">
+                    <div className="text-left text-xs">
+                      <div className="font-bold text-white flex items-center gap-1.5">
+                        <KeyRound className="w-4 h-4 text-emerald-400" />
+                        <span>Groq API Key (Llama 3.3 70B)</span>
+                      </div>
+                      <div className="text-[11px] text-zinc-400 mt-0.5">
+                        {hasGroqKey ? '✅ Key is Configured & Active' : 'Free key from console.groq.com/keys'}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowKeyModal(true)}
+                      className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow transition-all cursor-pointer"
+                    >
+                      {hasGroqKey ? 'Manage Key' : 'Enter Key 🔑'}
+                    </button>
+                  </div>
 
                   {/* Starter Doubt Suggestions */}
                   <div className="w-full text-left">

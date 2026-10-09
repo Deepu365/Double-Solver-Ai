@@ -1,7 +1,7 @@
 import { SubjectType } from '@/types';
 
 // Read model configuration strictly from environment variables
-export const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+export const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 export const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export const MAX_MESSAGE_LENGTH = 4000;
@@ -157,63 +157,95 @@ export async function streamGroqCompletion(
     );
   }
 
-  let response: Response;
-  try {
-    response = await fetch(GROQ_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        messages,
-        temperature: 0.6,
-        max_tokens: 3000,
-        stream: true,
-      }),
-      signal,
-    });
-  } catch (err: unknown) {
-    const error = err as { name?: string; message?: string };
-    if (error?.name === 'AbortError') {
-      throw new LLMError('Generation stopped by user.', 499, false);
-    }
-    throw new LLMError(
-      'Network error connecting to Groq AI service. Please check your internet connection and try again.',
-      503,
-      true
-    );
-  }
+  const candidateModels = Array.from(
+    new Set([
+      GROQ_MODEL,
+      'llama-3.1-8b-instant',
+      'llama3-8b-8192',
+      'llama-3.3-70b-versatile',
+      'llama3-70b-8192',
+    ])
+  );
 
-  if (!response.ok) {
-    let errorDetail = '';
+  let response: Response | null = null;
+  let lastErrorDetail = '';
+  let lastStatus = 500;
+
+  for (const modelToTry of candidateModels) {
     try {
-      const errJson = await response.json();
-      errorDetail = errJson.error?.message || response.statusText;
-    } catch {
-      errorDetail = response.statusText;
-    }
+      const res = await fetch(GROQ_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: modelToTry,
+          messages,
+          temperature: 0.6,
+          max_tokens: 3000,
+          stream: true,
+        }),
+        signal,
+      });
 
-    if (response.status === 429) {
+      if (res.ok) {
+        response = res;
+        break;
+      }
+
+      lastStatus = res.status;
+      try {
+        const errJson = await res.json();
+        lastErrorDetail = errJson.error?.message || res.statusText;
+      } catch {
+        lastErrorDetail = res.statusText;
+      }
+
+      // If 404 (model not found/no access), try the next candidate model
+      if (res.status === 404) {
+        continue;
+      }
+
+      if (res.status === 429) {
+        throw new LLMError(
+          'Groq rate limit reached. The AI service is experiencing high demand—please wait a few seconds and click Retry.',
+          429,
+          true
+        );
+      }
+
+      if (res.status === 401 || res.status === 403) {
+        throw new LLMError(
+          'Authentication failed with Groq. Please verify that your GROQ_API_KEY is valid.',
+          401,
+          false
+        );
+      }
+
       throw new LLMError(
-        'Groq rate limit reached. The AI service is experiencing high demand—please wait a few seconds and click Retry.',
-        429,
+        `AI Service error (${res.status}): ${lastErrorDetail || 'Unable to generate response.'}`,
+        res.status,
+        true
+      );
+    } catch (err: unknown) {
+      if (err instanceof LLMError) throw err;
+      const error = err as { name?: string; message?: string };
+      if (error?.name === 'AbortError') {
+        throw new LLMError('Generation stopped by user.', 499, false);
+      }
+      throw new LLMError(
+        'Network error connecting to Groq AI service. Please check your internet connection and try again.',
+        503,
         true
       );
     }
+  }
 
-    if (response.status === 401 || response.status === 403) {
-      throw new LLMError(
-        'Authentication failed with Groq. Please verify that your GROQ_API_KEY is valid.',
-        401,
-        false
-      );
-    }
-
+  if (!response || !response.ok) {
     throw new LLMError(
-      `AI Service error (${response.status}): ${errorDetail || 'Unable to generate response.'}`,
-      response.status,
+      `AI Service error (${lastStatus}): ${lastErrorDetail || 'All Llama models failed to respond.'}`,
+      lastStatus,
       true
     );
   }

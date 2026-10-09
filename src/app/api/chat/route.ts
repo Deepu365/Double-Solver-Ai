@@ -269,13 +269,18 @@ export async function POST(req: NextRequest) {
         stream = await streamGroqCompletion(contextMessages, undefined, effectiveKey);
       } catch (llmErr: unknown) {
         const err = llmErr as LLMError;
-        return NextResponse.json(
-          {
-            error: err.message || 'Error communicating with Groq AI service.',
-            isRetryable: err.isRetryable ?? true,
-          },
-          { status: err.statusCode || 500 }
-        );
+        // If key is invalid or unauthorized, fall back gracefully to topic-aware tutor with helpful note
+        if (err.statusCode === 401 || err.statusCode === 403) {
+          stream = createDemoStream(validatedMessage, subject as SubjectType);
+        } else {
+          return NextResponse.json(
+            {
+              error: err.message || 'Error communicating with Groq AI service.',
+              isRetryable: err.isRetryable ?? true,
+            },
+            { status: err.statusCode || 500 }
+          );
+        }
       }
     }
 
