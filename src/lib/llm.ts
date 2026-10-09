@@ -1,7 +1,7 @@
 import { SubjectType } from '@/types';
 
 // Read model configuration strictly from environment variables
-export const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
+export const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
 export const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export const MAX_MESSAGE_LENGTH = 4000;
@@ -160,6 +160,9 @@ export async function streamGroqCompletion(
   const candidateModels = Array.from(
     new Set([
       GROQ_MODEL,
+      'openai/gpt-oss-120b',
+      'openai/gpt-oss-20b',
+      'qwen/qwen3.8-27b',
       'llama-3.1-8b-instant',
       'llama3-8b-8192',
       'llama-3.3-70b-versatile',
