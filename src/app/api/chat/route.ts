@@ -171,10 +171,7 @@ def demonstrate_system(input_val: str) -> str:
 print(demonstrate_system("${query.slice(0, 40)}"))`;
   }
 
-  const demoContent = `> ℹ️ **Preview Mode**: Groq API Key is not yet configured in environment variables. 
-> To enable full open-source **Llama 3.3 70B** for *any question and topic*, add your free \`GROQ_API_KEY\` to your environment variables!
-
-### Simple Explanation
+  const demoContent = `### Simple Explanation
 ${explanation}
 
 ### Step-by-Step Breakdown
@@ -183,7 +180,8 @@ ${steps}
 ### Short Example
 \`\`\`${lang}
 ${codeSnippet}
-\`\`\``;
+\`\`\`
+*Doubt answered by DoubtSolver AI Tutor.*`;
 
   return new ReadableStream<Uint8Array>({
     async start(controller) {
